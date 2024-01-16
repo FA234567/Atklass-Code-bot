@@ -33,8 +33,8 @@ async def view_class_code(ctx):
     else:
         await ctx.send("No class code has been set yet.")
 
-# Replace 'MTE5NjYxMTIxODI4NzM2MjE5OA.GQ96iy.ALWlk_fN4LMFkPVrhMLXCsl_wiI0ez9HhKiEOg' with your actual new bot token.
-bot.run('MTE5NjYxMTIxODI4NzM2MjE5OA.GQ96iy.ALWlk_fN4LMFkPVrhMLXCsl_wiI0ez9HhKiEOg')
+bot.run('YOUR_NEW_BOT_TOKEN')
+
 
 
 
