@@ -38,28 +38,27 @@ allowed_channels = [
     'cyber-security-fundamentals'
 ]
 
+
 # Function to check if the command can be used in the current channel.
 def is_allowed_channel(ctx):
     return ctx.channel.name.lower() in allowed_channels
+
 
 # Function to set the class code with an expiration time and user ID.
 @bot.command()
 @commands.check(is_allowed_channel)
 async def set_class_code(ctx, code: str):
     global class_code_info
-    current_time = time.time()
-    
-    # Check if the current time is past the expiration time.
-    if current_time > class_code_info['expiration_time']:
-        # If so, reset the class_code_info to accept a new code.
+    if class_code_info['submitted_by'] is None:
         class_code_info['code'] = code
-        class_code_info['expiration_time'] = current_time + 4 * 60 * 60  # Set expiration time to 4 hours
-        class_code_info['submitted_by'] = ctx.author.id
-        await ctx.send(f"Class code set to {code} by {ctx.author.name}.")
+        class_code_info[
+            'expiration_time'] = time.time() + 4 * 60 * 60  # Set expiration time to 4 hours (4 * 60 * 60 seconds)
+        class_code_info['submitted_by'] = ctx.author.id  # Store the user ID who submitted the class code
+        await ctx.send(f"Class code has been set by {ctx.author.name}.")
     else:
-        previous_submitter = bot.get_user(class_code_info['submitted_by'])
-        previous_submitter_name = previous_submitter.name if previous_submitter else "Unknown User"
-        await ctx.send(f"Class code already set to {class_code_info['code']} by {previous_submitter_name}.")
+        previous_submitter = bot.get_user(class_code_info['submitted_by']).name
+        await ctx.send(f"Class code has already been submitted by {previous_submitter}.")
+
 
 # Function to view the current class code, but only if it's within the expiration time.
 @bot.command()
@@ -75,10 +74,12 @@ async def view_class_code(ctx):
     else:
         await ctx.send("No class code is available or it has expired.")
 
+
 # Event listener for when the bot has successfully connected to Discord.
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user.name}')
+
 
 # Replace 'YOUR_BOT_TOKEN' with your actual bot token.
 bot.run('YOUR_NEW_BOT_TOKEN')
