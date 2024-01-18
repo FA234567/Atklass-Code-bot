@@ -39,11 +39,9 @@ allowed_channels = [
     'cyber-security-fundamentals'
 ]
 
-
 # Function to check if the command can be used in the current channel.
 def is_allowed_channel(ctx):
     return ctx.channel.name.lower() in allowed_channels
-
 
 # Function to set the class code with an expiration time and user ID.
 @bot.command()
@@ -66,7 +64,6 @@ async def set_class_code(ctx, code: str):
         # If a different code is submitted before expiration, inform that a code has already been submitted.
         await ctx.send("A different class code has already been submitted and is still active.")
 
-
 # Function to view the current class code, but only if it's within the expiration time.
 @bot.command()
 @commands.check(is_allowed_channel)
@@ -86,7 +83,6 @@ async def view_class_code(ctx):
             f"The current class code is: {class_code_info['code']} (Submitted by {submitted_by_name} in channel {class_code_info['channel_name']}).")
     else:
         await ctx.send("No class code is available or it has expired.")
-
 
 # Event listener for when the bot has successfully connected to Discord.
 @bot.event
