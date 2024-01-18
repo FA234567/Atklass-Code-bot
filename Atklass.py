@@ -15,7 +15,8 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 class_code_info = {
     'code': "",
     'expiration_time': 0,
-    'submitted_by': None  # Store the user ID who submitted the class code
+    'submitted_by': None,  # Store the user ID who submitted the class code
+    'channel_name': None  # Store the channel name where the code was submitted
 }
 
 # List of allowed text channels where the commands can be used.
@@ -49,15 +50,21 @@ def is_allowed_channel(ctx):
 @commands.check(is_allowed_channel)
 async def set_class_code(ctx, code: str):
     global class_code_info
-    if class_code_info['submitted_by'] is None:
+    current_time = time.time()
+
+    # Check if the code is the same and it has not expired yet.
+    if code == class_code_info['code'] and current_time <= class_code_info['expiration_time']:
+        await ctx.send("The class code has already been submitted.")
+    elif current_time > class_code_info['expiration_time']:
+        # If the code is different or has expired, set the new code.
         class_code_info['code'] = code
-        class_code_info[
-            'expiration_time'] = time.time() + 4 * 60 * 60  # Set expiration time to 4 hours (4 * 60 * 60 seconds)
-        class_code_info['submitted_by'] = ctx.author.id  # Store the user ID who submitted the class code
-        await ctx.send(f"Class code has been set by {ctx.author.name}.")
+        class_code_info['expiration_time'] = current_time + 4 * 60 * 60  # Set expiration time to 4 hours
+        class_code_info['submitted_by'] = ctx.author.id
+        class_code_info['channel_name'] = ctx.channel.name
+        await ctx.send(f"Class code set to {code} by {ctx.author.name} in channel {ctx.channel.name}.")
     else:
-        previous_submitter = bot.get_user(class_code_info['submitted_by']).name
-        await ctx.send(f"Class code has already been submitted by {previous_submitter}.")
+        # If a different code is submitted before expiration, inform that a code has already been submitted.
+        await ctx.send("A different class code has already been submitted and is still active.")
 
 
 # Function to view the current class code, but only if it's within the expiration time.
@@ -66,11 +73,17 @@ async def set_class_code(ctx, code: str):
 async def view_class_code(ctx):
     current_time = time.time()
     expiration_time = class_code_info['expiration_time']
+    submitted_by = class_code_info.get('submitted_by')
+
+    if submitted_by is not None:
+        submitted_user = bot.get_user(submitted_by)
+        submitted_by_name = submitted_user.name if submitted_user else "Unknown User"
+    else:
+        submitted_by_name = "Unknown User"
 
     if current_time <= expiration_time:
-        submitted_by = bot.get_user(class_code_info['submitted_by']).name if class_code_info[
-            'submitted_by'] else "Unknown User"
-        await ctx.send(f"The current class code is: {class_code_info['code']} (Submitted by {submitted_by})")
+        await ctx.send(
+            f"The current class code is: {class_code_info['code']} (Submitted by {submitted_by_name} in channel {class_code_info['channel_name']}).")
     else:
         await ctx.send("No class code is available or it has expired.")
 
