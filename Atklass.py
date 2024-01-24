@@ -81,6 +81,23 @@ async def view_class_code(ctx):
     else:
         await ctx.send("No class code is available or it has expired.")
 
+# Function to clear the class code.
+@bot.command()
+@commands.check(is_allowed_channel)
+async def clear_class_code(ctx):
+    global class_code_info
+    current_time = time.time()
+
+    if current_time <= class_code_info['expiration_time']:
+        # Clear the class code by setting it to an empty string and resetting the expiration time.
+        class_code_info['code'] = ""
+        class_code_info['expiration_time'] = 0
+        class_code_info['submitted_by'] = None
+        class_code_info['channel_name'] = None
+        await ctx.send("Class code has been cleared.")
+    else:
+        await ctx.send("No class code is available or it has expired.")
+
 # Event listener for when the bot has successfully connected to Discord.
 @bot.event
 async def on_ready():
